@@ -1,13 +1,45 @@
-const express = require('express');  
-const app = express(); 
-const port = process.env.PORT || 5000 
-const bodyParser = require('body-parser');
-const users = require("./test/MOCK_DATA.json");
 
+const express = require('express');
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const corsConfig = require('./config/corsConfig');
+const userRoute = require('./routes/userRoute');
+const path = require("path");
+
+dotenv.config();
+const app = express();
+const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
-// 
-// app.use(express.json());  
+app.use(corsConfig);
+app.use(express.json());
+
+// Connect to MongoDB
+connectDB();
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Routes
+app.use('/api', userRoute);
+
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public', 'index.html'));
+});
+app.get('*', (req, res) => {
+    res.status(404).send("<h1>The page you are looking for is not found</h1>");
+});
+
+app.listen(port, (error) => {
+    if (!error) 
+        console.log(`Server running at http://localhost:${port}`);
+    else 
+        console.log("Error occurred, server can't start", error);
+});
+
+
 
 // const path = require("path") 
 // const hbs = require ("hbs") // foe using partials
@@ -35,93 +67,92 @@ app.use(bodyParser.json());
 //  <>{{ channelName}}</>
 //  
 
-// Get all users
-app.get('/users', (req, res) => {
-    res.json(users);
-});
-
+//  Get all users
+// app.get('/users', (req, res) => {
+//     res.json(users);
+// });
+// 
 // Get a single user by ID
-app.get('/users/:id', (req, res) => {
-    const user = users.find(u => u.id == req.params.id);
-    if (user) {
-        res.json(user);
-    } else {
-        res.status(404).send('User not found');
-    }
-});
-
+// app.get('/users/:id', (req, res) => {
+//     const user = users.find(u => u.id == req.params.id);
+//     if (user) {
+//         res.json(user);
+//     } else {
+//         res.status(404).send('User not found');
+//     }
+// });
+// 
 // Create a new user
-app.post('/users', (req, res) => {
-    const newUser = {
-        id: currentId++,
-        ...req.body
-    };
-    users.push(newUser);
-    res.status(201).json(newUser);
-});
-
+// app.post('/users', (req, res) => {
+//     const newUser = {
+//         ...req.body
+//     };
+//     users.push(newUser);
+//     res.status(201).json(newUser);
+// });
+// 
 // Update a user by ID
-app.put('/users/:id', (req, res) => {
-    const index = users.findIndex(u => u.id == req.params.id);
-    if (index !== -1) {
-        users[index] = { id: parseInt(req.params.id), ...req.body };
-        res.json(users[index]);
-    } else {
-        res.status(404).send('User not found');
-    }
-});
+// app.put('/users/:id', (req, res) => {
+//     const index = users.findIndex(u => u.id == req.params.id);
+//     if (index !== -1) {
+//         users[index] = { id: parseInt(req.params.id), ...req.body };
+//         res.json(users[index]);
+//     } else {
+//         res.status(404).send('User not found');
+//     }
+// });
+// 
+ // Delete a user by ID
+// app.delete('/users/:id', (req, res) => {
+//     const index = users.findIndex(u => u.id == req.params.id);
+//     if (index !== -1) {
+//         users.splice(index, 1);
+//         res.status(204).send();
+//     } else {
+//         res.status(404).send('User not found');
+//     }
+// });
 
-// Delete a user by ID
-app.delete('/users/:id', (req, res) => {
-    const index = users.findIndex(u => u.id == req.params.id);
-    if (index !== -1) {
-        users.splice(index, 1);
-        res.status(204).send();
-    } else {
-        res.status(404).send('User not found');
-    }
-});
-
-
- 
- app.get('/', (req, res)=>{ 
-    res.status(200).send("Welcome to the world of Anjum Mishra");  
-}); 
-
-
-app.get('/about', (req, res)=>{ 
-    res.set('Content-Type', 'text/html'); 
-    res.status(200).send("<h1>Hello Anjum Mishra!</h1>"); 
-}); 
-app.post('/', (req, res)=>{ 
-    const requestData = req.body; 
-    console.log('Received data:', requestData); 
-    res.status(200).send(`${requestData .name}`); 
+// 
+//  
+//  app.get('/', (req, res)=>{ 
+//     res.status(200).send("Welcome to the world of Anjum Mishra");  
+// }); 
+// 
+// 
+// app.get('/about', (req, res)=>{ 
+//     res.set('Content-Type', 'text/html'); 
+//     res.status(200).send("<h1>Hello Anjum Mishra!</h1>"); 
+//  }); 
+// app.post('/', (req, res)=>{ 
+//     const requestData = req.body; 
+//     console.log('Received data:', requestData); 
+//     res.status(200).send(`${requestData .name}`); 
 
     // const {name} = req.body; 
     // res.send(`Welcome  to world of ${name}`); 
-}) 
+//}) 
   
-
-app.get('/temp', (req, res)=>{ 
-    res.status(200).send({
-        id:1,
-        name:"anjum mishra"
-    });
-   
-}); 
-app.get('*', (req, res)=>{ 
-    res.status(404).send(" <h1>the page you are looking for is not found </h1>");
-   
-}); 
-
-app.listen(port, (error) =>{ 
-    if(!error) 
-        console.log(`Server running at http://localhost:${port}`) 
-    else 
-        console.log("Error occurred, server can't start", error); 
-    } 
-);
+// 
+// app.get('/temp', (req, res)=>{ 
+//     res.status(200).send({
+//         id:1,
+//         name:"anjum mishra"
+//     });
+//    
+// }); 
+// app.get('*', (req, res)=>{ 
+//     res.status(404).send(" <h1>the page you are looking for is not found </h1>");
+//    
+// }); 
+// 
+// app.listen(port, (error) =>{ 
+//     if(!error) 
+//         console.log(`Server running at http://localhost:${port}`) 
+//     else 
+//         console.log("Error occurred, server can't start", error); 
+//     } 
+// );
 
 
 
