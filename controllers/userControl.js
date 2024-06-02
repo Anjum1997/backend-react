@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const users = require('../test/MOCK_DATA.json');
+const users = require('../utilis/MOCK_DATA.json');
 const { uploadSingle, uploadMultiple } = require('../uploads/upload');
 
 

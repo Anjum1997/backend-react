@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const corsConfig = require('./config/corsConfig');
 const userRoute = require('./routes/userRoute');
+const authRoute = require('./routes/authRoute');
 const path = require("path");
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api', userRoute);
+app.use('/api/auth', authRoute); 
 
 
 app.get('/', (req, res) => {
@@ -159,7 +161,4 @@ app.listen(port, (error) => {
 //mkdir public
 //cd  public
 //type null > index.html
-// 
-// multer // file upload
-// cors
-// mongodb
+
