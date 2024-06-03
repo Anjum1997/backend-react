@@ -1,12 +1,15 @@
 const Auth = require('../models/Auth');
 const bcrypt = require('bcryptjs');
+const { registerSchema, loginSchema } = require('../utilis/validation');
+
 
 // Register a new user
 exports.registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).send('All fields are required');
+  const { error } = registerSchema.validate({ name, email, password });
+  if (error) {
+    return res.status(400).send(error.details[0].message);
   }
 
   try {
@@ -26,7 +29,7 @@ exports.registerUser = async (req, res) => {
 
     await user.save();
 
-    res.status(201).send({ msg: 'User registered successfully',user});
+    res.status(201).send({ msg: 'User registered successfully', user });
   } catch (err) {
     res.status(500).send('Server error');
   }
@@ -36,8 +39,9 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).send('All fields are required');
+  const { error } = loginSchema.validate({ email, password });
+  if (error) {
+    return res.status(400).send(error.details[0].message);
   }
 
   try {

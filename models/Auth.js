@@ -5,8 +5,7 @@ const AuthSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minlength: 4,
-    maxlength: 25
+    
   },
   email: {
     type: String,
