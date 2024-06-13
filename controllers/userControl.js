@@ -1,10 +1,38 @@
 
- const User = require('../models/User');
+ const User = require('../models/user');
  const bcrypt = require('bcryptjs');
- const users = require('../utilis/MOCK_DATA.json');
+ const users = require('../test/MOCK_DATA.json');
  const { uploadSingle, uploadMultiple } = require('../uploads/upload');
  
  
+
+ exports.getAllItems = async (req, res) => {
+  try {
+    const result = await User.aggregate([
+      {
+        $lookup: {
+          from: 'products', 
+          let: { userId: '$id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$product_id', '$$userId'] },
+              }
+            }
+          ],
+          as: 'user_products'
+        }
+      },
+      {
+          $match: { 'user_products.price': { $gt: 500 } } 
+        },
+  
+    ]);
+    res.send(result);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+ }
  // Get all users
  exports.getAllUsers = (req, res) => {
    res.json(users);
@@ -96,6 +124,9 @@ user.address = address || user.address;
  };
 
 
+
+
+
 // File upload handlers
 exports.uploadSingleFile = (req, res) => {
     uploadSingle(req, res, (err) => {
@@ -124,3 +155,5 @@ exports.uploadMultipleFiles = (req, res) => {
         }
     });
 };
+
+

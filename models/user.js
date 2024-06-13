@@ -1,7 +1,13 @@
 
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const UserSchema = new mongoose.Schema({
+
+const UserSchema = new Schema({
+    id:{
+        type: String,
+        required: true
+    },
     firstname: {
         type: String,
         required: true,
@@ -46,7 +52,12 @@ const UserSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+   
+    products: {
+        type: Schema.Types.ObjectId,
+        ref: 'Product'
+      }
 });
 
 module.exports = mongoose.model('User', UserSchema);

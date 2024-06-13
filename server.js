@@ -3,10 +3,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const corsConfig = require('./config/corsConfig');
+const corsConfig = require('./middlewares/corsConfig');
 const userRoute = require('./routes/userRoute');
+const productRoute = require('./routes/productRoute');
 const authRoute = require('./routes/authRoute');
+const protectedRoute = require('./routes/protectedRoute');
 const path = require("path");
+const fs = require('fs');
+const generateExcelFromJSON = require('./utilis/exportToExcel');
+const router = express.Router();
 
 dotenv.config();
 const app = express();
@@ -24,11 +29,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api', userRoute);
+app.use('/api', productRoute);
 app.use('/api/auth', authRoute); 
-
+app.use('/api/auth', protectedRoute);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public', 'index.html'));
+});
+
+  
+  
+// Path to your JSON file
+const jsonFilePath = path.join(__dirname, './test/MOCK_DATA.json');
+
+//  generate and download Excel file
+app.get('/download-excel', (req, res) => {
+  try {
+    // Generate the Excel file from the JSON data
+    const excelFilePath = generateExcelFromJSON(jsonFilePath);
+
+    // Send the Excel file
+    res.download(excelFilePath, 'users.xlsx', (err) => {
+      if (err) {
+        console.error('An error occurred while sending the file:', err.message);
+      }
+
+       // Delete the temp file after sending
+ fs.unlinkSync(excelFilePath);
+    });
+  } catch (err) {
+    console.error('An error occurred:', err.message);
+    res.status(500).send('An error occurred while generating the Excel file.');
+  }
 });
 app.get('*', (req, res) => {
     res.status(404).send("<h1>The page you are looking for is not found</h1>");
