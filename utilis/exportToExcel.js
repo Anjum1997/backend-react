@@ -22,5 +22,4 @@ const generateExcelFromJSON = (jsonFilePath, sheetName = 'Sheet1') => {
 
   return excelFilePath;
 };
-
 module.exports = generateExcelFromJSON;

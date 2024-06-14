@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const Auth = require('../models/Auth');
-
 dotenv.config();
 
 const generateAccessToken = (user) => {
@@ -32,5 +31,4 @@ const verifyRefreshToken = (token) => {
     });
   });
 };
-
 module.exports = { generateAccessToken, generateRefreshToken, verifyRefreshToken };

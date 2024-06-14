@@ -1,4 +1,3 @@
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
@@ -14,6 +13,7 @@ const generateExcelFromJSON = require('./utilis/exportToExcel');
 const router = express.Router();
 
 dotenv.config();
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -37,7 +37,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public', 'index.html'));
 });
 
-  
   
 // Path to your JSON file
 const jsonFilePath = path.join(__dirname, './test/MOCK_DATA.json');
@@ -72,8 +71,6 @@ app.listen(port, (error) => {
     else 
         console.log("Error occurred, server can't start", error);
 });
-
-
 
 // const path = require("path") 
 // const hbs = require ("hbs") // foe using partials
@@ -135,7 +132,7 @@ app.listen(port, (error) => {
 //         res.status(404).send('User not found');
 //     }
 // });
-// 
+
  // Delete a user by ID
 // app.delete('/users/:id', (req, res) => {
 //     const index = users.findIndex(u => u.id == req.params.id);
@@ -147,13 +144,10 @@ app.listen(port, (error) => {
 //     }
 // });
 
-// 
-//  
 //  app.get('/', (req, res)=>{ 
 //     res.status(200).send("Welcome to the world of Anjum Mishra");  
 // }); 
-// 
-// 
+
 // app.get('/about', (req, res)=>{ 
 //     res.set('Content-Type', 'text/html'); 
 //     res.status(200).send("<h1>Hello Anjum Mishra!</h1>"); 
@@ -167,19 +161,18 @@ app.listen(port, (error) => {
     // res.send(`Welcome  to world of ${name}`); 
 //}) 
   
-// 
 // app.get('/temp', (req, res)=>{ 
 //     res.status(200).send({
 //         id:1,
 //         name:"anjum mishra"
 //     });
-//    
+
 // }); 
 // app.get('*', (req, res)=>{ 
 //     res.status(404).send(" <h1>the page you are looking for is not found </h1>");
 //    
 // }); 
-// 
+
 // app.listen(port, (error) =>{ 
 //     if(!error) 
 //         console.log(`Server running at http://localhost:${port}`) 
@@ -187,8 +180,6 @@ app.listen(port, (error) => {
 //         console.log("Error occurred, server can't start", error); 
 //     } 
 // );
-
-
 
 //mkdir public
 //cd  public

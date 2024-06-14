@@ -4,7 +4,6 @@
  const users = require('../test/MOCK_DATA.json');
  const { uploadSingle, uploadMultiple } = require('../uploads/upload');
  
- 
 
  exports.getAllItems = async (req, res) => {
   try {
@@ -33,6 +32,7 @@
     res.status(500).send(error);
   }
  }
+
  // Get all users
  exports.getAllUsers = (req, res) => {
    res.json(users);
@@ -57,7 +57,7 @@
      if (user) {
        return res.status(400).json({ msg: 'User already exists' });
      }
- 
+
      user = new User ({    
       firstname,
       lastname,
@@ -122,9 +122,6 @@ user.address = address || user.address;
      res.status(500).send('Server error');
    }
  };
-
-
-
 
 
 // File upload handlers

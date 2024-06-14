@@ -1,7 +1,6 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/authMiddleware');
 const Auth = require('../models/Auth');
-
 const router = express.Router();
 
 router.get('/profile', authMiddleware, async (req, res) => {
@@ -12,5 +11,4 @@ router.get('/profile', authMiddleware, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
 module.exports = router;

@@ -5,8 +5,6 @@ const http = require('http');
  const path = require ("path")
  const os = require('os');
   
- 
-
 
  const data = {
   name:'anjum mishra',
@@ -21,17 +19,13 @@ age:"26",
  console.log(obData);
 
 
-
  console.log(path.dirname('D:\React\Node-backend\index.js'));
  console.log(path.basename('D:\React\Node-backend\index.js'));
  console.log(path.extname('D:\React\Node-backend\index.js'));
  
  console.log(path.parse('D:\React\Node-backend\index.js'));
- 
  const myPath = path.parse('D:\React\Node-backend\index.js');
- 
  console.log(myPath.name);
- 
  
  // return the cpu architecture
  console.log("CPU architecture: " + os.arch());
@@ -48,7 +42,7 @@ console.log('List of network Interfaces: ' + os.networkInterfaces());
 // It returns the operating systems default directory for temp files.
 console.log('OS default directory for temp files : ' + os.tmpdir());  
  
- 
+
   fs.mkdir(path.join(__dirname, 'app'),
       (err) => {
           if (err) {
@@ -56,9 +50,7 @@ console.log('OS default directory for temp files : ' + os.tmpdir());
           }
           console.log('Directory created successfully!');
       });
- 
-       
-   
+  
  fs.rmdir("app", () => { 
   console.log("Folder Deleted!"); 
 });
@@ -72,16 +64,12 @@ console.log('OS default directory for temp files : ' + os.tmpdir());
          console.log('Directory created successfully!');
      });
 
-    
-
 fs.writeFileSync("server.txt","welcome to my space anjum mishra \n ");
  
-  
   fs.writeFileSync("server.txt","welcome to my space anjum mishra , go to kneel in front of god \n");
  
   fs.appendFileSync("server.txt" ,' how are you  gor to channel for subscribing and entertaining you in future');
   
- 
     const buf_data = fs.readFileSync("server.txt");
  // console.log(buf_data);
     org_data = buf_data.toString();
@@ -104,7 +92,6 @@ fs.writeFileSync("server.txt","welcome to my space anjum mishra \n ");
     }); 
   } 
  
-  
 
 const server = http.createServer((req, res) => { 
    res.writeHead(200, { 'Content-Type': 'text/html'});
@@ -142,17 +129,3 @@ server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 
-
-
-
-// mongodb password:
-  //kRLFwiVKOcQx8NPR
-
-
-
-  // if (pathname === '/') {
-  //   serveFile(path.join(__dirname, 'public', 'index.html'), 'text/html', res);
-  // } else if (pathname === '/about') {
-  //   serveFile(path.join(__dirname, 'public', 'about.html'), 'text/html', res);
-  // } else if (pathname === '/sysinfo') {
-  //   res.writeHead(200, { 'Content-Type': 'application/json' });

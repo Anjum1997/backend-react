@@ -1,5 +1,3 @@
-
-
 const cors = require('cors');
 
 const corsOptions = {
@@ -8,5 +6,4 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200
 };
-
 module.exports = cors(corsOptions);

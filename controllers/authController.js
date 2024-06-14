@@ -7,7 +7,7 @@ const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = requir
 exports.registerUser = async (req, res) => {
   const { username, email, password } = req.body;
   const { error } = registerSchema.validate({ username, email, password });
-
+  
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
@@ -18,11 +18,7 @@ exports.registerUser = async (req, res) => {
       return res.status(400).send('User already exists');
     }
 
-    user = new Auth({
-      username,
-      email,
-      password,
-    });
+    user = new Auth({ username, email, password, });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
