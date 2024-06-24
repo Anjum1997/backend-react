@@ -58,7 +58,7 @@
        return res.status(400).json({ msg: 'User already exists' });
      }
 
-     user = new User ({    
+     user = new User ({  
       firstname,
       lastname,
       email,

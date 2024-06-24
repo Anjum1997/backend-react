@@ -10,6 +10,7 @@ const protectedRoute = require('./routes/protectedRoute');
 const path = require("path");
 const fs = require('fs');
 const generateExcelFromJSON = require('./utilis/exportToExcel');
+const morgan = require('morgan');
 const router = express.Router();
 
 dotenv.config();
@@ -26,6 +27,8 @@ connectDB();
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 // Routes
 app.use('/api', userRoute);

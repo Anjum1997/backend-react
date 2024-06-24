@@ -9,17 +9,15 @@ const AuthSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, "Your email address is required"],
+    lowercase: true,
     unique: true,
   },
   password: {
     type: String,
     required: [true, "Your password is required"],
-  },
-  date: {
-    type: Date,
-    default: Date.now
-  }
-});
+   },
+   phone: { type: String },
+},
+{timestamps: true});
 
 module.exports  = mongoose.model('Auth', AuthSchema);
-
