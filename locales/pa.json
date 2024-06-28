@@ -1,0 +1,21 @@
+{
+  "validation_error": "ਮਾਨਤਾ ਦਾ ਗਲਤੀ: {{message}}",
+  "user_exists": "ਉਪਭੋਗਤਾ ਪਹਿਲਾਂ ਹੀ ਮੌਜੂਦ ਹੈ",
+  "user_registered": "ਉਪਭੋਗਤਾ ਸਫਲਤਾਪੂਰਵਕ ਰਜਿਸਟਰ ਕੀਤਾ ਗਿਆ ਹੈ",
+  "email_verified": "ਈਮੇਲ ਸਫਲਤਾਪੂਰਵਕ ਪ੍ਰਮਾਣਿਤ ਹੋ ਗਈ ਹੈ",
+  "invalid_otp": "ਅਮਾਨਤਾ OTP",
+  "expired_otp": "OTP ਦੀ ਮਿਆਦ ਖਤਮ ਹੋ ਗਈ ਹੈ",
+  "user_not_found": "ਉਪਭੋਗਤਾ ਨਹੀਂ ਲੱਭਿਆ",
+  "invalid_credentials": "ਗਲਤ ਪ੍ਰਮਾਣਿਤ",
+  "login_successful": "ਲਾਗਇਨ ਸਫਲ",
+  "token_refreshed": "ਟੋਕਨ ਸਫਲਤਾਪੂਰਵਕ ਤਾਜ਼ਾ ਕੀਤਾ ਗਿਆ ਹੈ",
+  "no_token_provided": "ਕੋਈ ਟੋਕਨ ਪ੍ਰਦਾਨ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ",
+  "invalid_refresh_token": "ਗਲਤ ਤਾਜ਼ਾ ਕਰਨ ਵਾਲਾ ਟੋਕਨ",
+  "password_reset_email_sent": "ਪਾਸਵਰਡ ਰੀਸੈਟ ਈਮੇਲ {{email}} ਨੂੰ ਭੇਜਿਆ ਗਿਆ ਹੈ",
+  "password_reset_success": "ਪਾਸਵਰਡ ਸਫਲਤਾਪੂਰਵਕ ਰੀਸੈਟ ਕੀਤਾ ਗਿਆ ਹੈ",
+  "no_user_found": "ਉਸ ਈਮੇਲ ਐਡਰੈੱਸ ਨਾਲ ਕੋਈ ਉਪਭੋਗਤਾ ਨਹੀਂ ਲੱਭਿਆ",
+  "authentication_successful": "ਪ੍ਰਮਾਣਿਤੀ ਸਫਲ",
+  "otp_message": "ਤੁਹਾਡਾ ਸਟੀਕਰਨ ਕੋਡ {{code}} ਹੈ",
+  "invalid_or_expired_token": "ਅਵੈਧ ਜਾਂ ਸਮਾਪਤ ਟੋਕਨ",
+  "otp_sent": "ਓਟੀਪੀ ਭੇਜਿਆ ਗਿਆ"
+}

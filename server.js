@@ -1,16 +1,20 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const corsConfig = require('./middlewares/corsConfig');
 const userRoute = require('./routes/userRoute');
 const productRoute = require('./routes/productRoute');
 const authRoute = require('./routes/authRoute');
 const protectedRoute = require('./routes/protectedRoute');
 const path = require("path");
 const fs = require('fs');
+const cookieParser = require('cookie-parser');
+const i18n = require('./config/i18-config');
 const generateExcelFromJSON = require('./utilis/exportToExcel');
 const morgan = require('morgan');
+const { successHandler, errorHandler } = require('./middlewares/responseHandler');
+
 const router = express.Router();
 
 dotenv.config();
@@ -19,8 +23,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
-app.use(corsConfig);
+app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+app.use(i18n.init);
 
 // Connect to MongoDB
 connectDB();
@@ -30,11 +36,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
+
+// Apply success handler middleware
+app.use(successHandler);
+
+// Middleware to set locale from cookie
+app.use((req, res, next) => {
+  const locale = req.query.lang || req.cookies.locale || req.headers['accept-language'];
+  if (locale) {
+    res.setLocale(locale);
+  }
+  next();
+});
 // Routes
+
 app.use('/api', userRoute);
 app.use('/api', productRoute);
 app.use('/api/auth', authRoute); 
 app.use('/api/auth', protectedRoute);
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public', 'index.html'));
@@ -64,9 +84,27 @@ app.get('/download-excel', (req, res) => {
     res.status(500).send('An error occurred while generating the Excel file.');
   }
 });
+// 
+// app.get('/hello', (req, res) => {
+//   res.send(res.__('hello')); // Using i18n to get the translation for "hello"
+// });
+// 
+// app.get('/name', (req, res) => {
+//   res.send(res.__('anjum_mishra')); // Using i18n to get the translation for "anjum_mishra"
+// });
+
+
+app.get('/get-started', (req, res) => {
+  res.json({ message: 'Welcome  To My Website !' });
+});
+
 app.get('*', (req, res) => {
     res.status(404).send("<h1>The page you are looking for is not found</h1>");
 });
+
+
+// Use the error handler middleware
+app.use(errorHandler);
 
 app.listen(port, (error) => {
     if (!error) 

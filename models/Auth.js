@@ -1,23 +1,29 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const AuthSchema = new mongoose.Schema({
+const authSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: [true, "Your username is required"],
-    trim: true,
+    required: function() { return !this.phone; },
   },
   email: {
     type: String,
-    required: [true, "Your email address is required"],
-    lowercase: true,
     unique: true,
+    required: function() { return !this.phone; },
+  },
+  phone: {
+    type: String,
+    unique: true,
+    required: function() { return !this.email; },
   },
   password: {
     type: String,
-    required: [true, "Your password is required"],
-   },
-   phone: { type: String },
-},
-{timestamps: true});
+    required: function() { return !this.phone; },  // Password required if not phone-based user
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  }
+}, { timestamps: true });
 
-module.exports  = mongoose.model('Auth', AuthSchema);
+const Auth = mongoose.model('Auth', authSchema);
+module.exports = Auth;

@@ -2,205 +2,235 @@ const Auth = require('../models/Auth');
 const Otp = require('../models/Otp');
 const client = require('../utilis/Twilio');
 const bcrypt = require('bcryptjs');
-const { registerSchema, loginSchema, requestPasswordResetSchema, resetPasswordSchema, phoneSignInSchema, otpVerificationSchema } = require('../utilis/validation');
-const { generateAccessToken, generateRefreshToken, verifyRefreshToken, generatePasswordResetToken, verifyPasswordResetToken  } = require('../utilis/jwt');
-const { sendResetPasswordEmail } = require('../utilis/nodeMailer');
-
+const validationschema = require('../utilis/validation');
+const jwt = require('../utilis/jwt');
+const { sendOtpEmail, sendResetPasswordEmail } = require('../utilis/nodeMailer');
+const CustomError = require('../utilis/customError');
 
 // Register a new user
-exports.registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
-  const { error } = registerSchema.validate({ username, email, password });
-  
+exports.registerUser = async (req, res, next) => {
+  const { error } = validationschema.registerSchema.validate(req.body);
+
   if (error) {
-    return res.status(400).send(error.details[0].message);
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
   }
 
   try {
-    let user = await Auth.findOne({ email });
+    let user = await Auth.findOne({ email: req.body.email });
     if (user) {
-      return res.status(400).send('User already exists');
+      return next(new CustomError(res.__('user_exists'), 400));
     }
 
-    user = new Auth({ username, email, password, });
+    user = new Auth({ ...req.body, isVerified: false });
 
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    user.password = await bcrypt.hash(req.body.password, salt);
 
-    await user.save();
-    return res.status(201).send({ msg: 'User registered successfully',user });
-  } catch (err) {
-    res.status(500).send('Server error');
-  }
-};
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-// Login a user
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  const { error } = loginSchema.validate({ email, password });
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-
-  try {
-    const user = await Auth.findOne({ email });
-    if (!user) {
-      return res.status(400).send('Invalid credentials');
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).send('Invalid credentials');
-    }
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-    return res.send({ msg: 'Login successful', accessToken, refreshToken });
-  } catch (err) {
-    res.status(500).send('Server error');
-  }
-};
-
-
-// Refresh token
-exports.refreshToken = async (req, res) => {
-  const { token } = req.body;
-  if (!token) {
-    return res.status(401).send('Access denied. No token provided.');
-  }
-
-  try {
-    const user = await verifyRefreshToken(token);
-    if (!user) {
-      return res.status(403).send('Invalid refresh token.');
-    }
-
-    const accessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
-
-    return res.send({ accessToken, refreshToken: newRefreshToken });
-  } catch (err) {
-    res.status(500).send('Server error');
-  }
-};
-
-
-// Request password reset
-exports.requestPasswordReset = async (req, res) => {
-  const { email } = req.body;
-  const { error } = requestPasswordResetSchema.validate({ email });
-
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-
-  try {
-    const user = await Auth.findOne({ email });
-    if (!user) {
-      return res.status(400).send('No user found with that email address');
-    }
-
-    const token = generatePasswordResetToken(user);
-    await sendResetPasswordEmail(user.email, token);
-
-    return res.status(200).send({ msg: 'A password reset email has been sent to ' + user.email , token});
-  } catch (err) {
-    res.status(500).send('Server error');
-  }
-};
-
-// Reset password
-exports.resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body;
-  const { error } = resetPasswordSchema.validate({ token, newPassword });
-
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-
-  try {
-    const decoded = await verifyPasswordResetToken(token);
-    const user = await Auth.findById(decoded.id);
-
-    if (!user) {
-      return res.status(400).send('Password reset token is invalid or has expired');
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    await user.save();
-
-    res.status(200).send('Password has been reset successfully');
-  } catch (err) {
-    res.status(500).send('Server error');
-  }
-};
-
-// Generate OTP and send it via SMS
-exports.signInWithPhone = async (req, res) => {
-  const { phone } = req.body;
-  const { error } = phoneSignInSchema.validate({ phone });
-
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-
-  // Generate a 6-digit OTP
-  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-  // Set OTP expiration time (5 minutes)
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-  try {
-    // Save OTP to the database
-    const otp = new Otp({ phone, code: otpCode, expiresAt });
+    const otp = new Otp({ email: req.body.email, code: otpCode, expiresAt });
     await otp.save();
-    const phoneNumber = `+91${7082098254}`; 
-    // Send OTP via SMS
-    await client.messages.create({
-      body: `Your verification code is ${otpCode}`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phoneNumber
-    });
-    res.status(200).send({ msg: 'OTP sent successfully' });
+
+    await sendOtpEmail(req.body.email, otpCode);
+    await user.save();
+
+    return res.status(201).json({ msg: res.__('user_registered'), user });
   } catch (err) {
-    res.status(500).send('Server error');
+    next(err);
   }
 };
 
-// Verify OTP and authenticate user
-exports.verifyOtp = async (req, res) => {
-  const { phone, code } = req.body;
-  const { error } = otpVerificationSchema.validate({ phone, code });
+// Verify email OTP
+exports.verifyEmailOtp = async (req, res, next) => {
+  const { error } = validationschema.otpEmailVerificationSchema.validate(req.body);
 
   if (error) {
-    return res.status(400).send(error.details[0].message);
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
   }
 
   try {
-    const otp = await Otp.findOne({ phone, code });
+    const otp = await Otp.findOne({ email: req.body.email, code: req.body.code });
     if (!otp) {
-      return res.status(400).send('Invalid OTP');
+      return next(new CustomError(res.__('invalid_otp'), 400));
     }
 
     if (otp.expiresAt < new Date()) {
       await Otp.deleteOne({ _id: otp._id });
-      return res.status(400).send('OTP has expired');
+      return next(new CustomError(res.__('expired_otp'), 400));
     }
 
-    // Find or create user
-    let user = await Otp.findOne({ phone });
+    let user = await Auth.findOne({ email: req.body.email });
     if (!user) {
-      user = new Otp({ phone });
-      await user.save();
+      return next(new CustomError(res.__('user_not_found'), 400));
     }
-    const token = generateAccessToken(user);
 
-    // Delete OTP after verification
+    user.isVerified = true;
+    await user.save();
     await Otp.deleteOne({ _id: otp._id });
 
-    res.status(200).send({ msg: 'Authentication successful', token});
+    return res.status(200).json({ msg: res.__('email_verified'), user });
   } catch (err) {
-    res.status(500).send('Server error');
+    next(err);
+  }
+};
+
+// Login a user
+exports.loginUser = async (req, res, next) => {
+  const { error } = validationschema.loginSchema.validate(req.body);
+
+  if (error) {
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+  }
+
+  try {
+    const user = await Auth.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new CustomError(res.__('invalid_credentials'), 400));
+    }
+
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    if (!isMatch) {
+      return next(new CustomError(res.__('invalid_credentials'), 400));
+    }
+
+    const accessToken = jwt.generateAccessToken(user);
+    const refreshToken = jwt.generateRefreshToken(user);
+
+    return res.status(200).json({ msg: res.__('login_successful'), accessToken, refreshToken });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Refresh token
+exports.refreshToken = async (req, res, next) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return next(new CustomError(res.__('no_token_provided'), 401));
+  }
+
+  try {
+    const user = await jwt.verifyRefreshToken(token);
+    if (!user) {
+      return next(new CustomError(res.__('invalid_refresh_token'), 403));
+    }
+
+    const accessToken = jwt.generateAccessToken(user);
+    const newRefreshToken = jwt.generateRefreshToken(user);
+
+    return res.status(200).json({ accessToken, refreshToken: newRefreshToken });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Request password reset
+exports.requestPasswordReset = async (req, res, next) => {
+  const { error } = validationschema.requestPasswordResetSchema.validate(req.body);
+
+  if (error) {
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+  }
+
+  try {
+    const user = await Auth.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new CustomError(res.__('no_user_found'), 400));
+    }
+
+    const token = jwt.generatePasswordResetToken(user);
+    await sendResetPasswordEmail(user.email, token);
+
+    return res.status(200).json({ msg: res.__('password_reset_email_sent', { email: user.email }), token });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Reset password
+exports.resetPassword = async (req, res, next) => {
+  const { error } = validationschema.resetPasswordSchema.validate(req.body);
+
+  if (error) {
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+  }
+
+  try {
+    const decoded = await jwt.verifyPasswordResetToken(req.body.token);
+    const user = await Auth.findById(decoded.id);
+
+    if (!user) {
+      return next(new CustomError(res.__('invalid_or_expired_token'), 400));
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.newPassword, salt);
+    await user.save();
+
+    return res.status(200).json({ msg: res.__('password_reset_success') });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Generate OTP and send it via SMS
+exports.signInWithPhone = async (req, res, next) => {
+  const { error } = validationschema.phoneSignInSchema.validate(req.body);
+
+  if (error) {
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+  }
+
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  try {
+    const otp = new Otp({ phone: req.body.phone, code: otpCode, expiresAt });
+    await otp.save();
+
+    await client.messages.create({
+      body: res.__('otp_message', { code: otpCode }),
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: `+91${req.body.phone}` 
+    });
+
+    return res.status(200).json({ msg: res.__('otp_sent') });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Verify OTP and authenticate user
+exports.verifyOtp = async (req, res, next) => {
+  const { error } = validationschema.otpVerificationSchema.validate(req.body);
+
+  if (error) {
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+  }
+
+  try {
+    const otp = await Otp.findOne({ phone: req.body.phone, code: req.body.code });
+    if (!otp) {
+      return next(new CustomError(res.__('invalid_otp'), 400));
+    }
+
+    if (otp.expiresAt < new Date()) {
+      await Otp.deleteOne({ _id: otp._id });
+      return next(new CustomError(res.__('expired_otp'), 400));
+    }
+
+    let user = await Auth.findOne({ phone: req.body.phone });
+    if (!user) {
+      user = new Auth({ phone: req.body.phone, isVerified: true });
+      await user.save();
+    }
+
+    const token = jwt.generateAccessToken(user);
+
+    return res.status(200).json({ msg: res.__('authentication_successful'), token });
+  } catch (err) {
+    next(err);
   }
 };

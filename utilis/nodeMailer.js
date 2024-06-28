@@ -13,6 +13,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const sendOtpEmail = async (email, otp) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is ${otp}`
+  };
+
+ return  await transporter.sendMail(mailOptions, function(error, info){
+  if (error) {
+    console.log(error);
+  } else {
+    console.log('Email sent: ' + info.response);
+  }
+});
+};
+  
 const sendResetPasswordEmail = (email, token) => {
   const mailOptions = {
     to: email,
@@ -32,4 +49,4 @@ const sendResetPasswordEmail = (email, token) => {
   });
 };
 
-module.exports = { sendResetPasswordEmail };
+module.exports = {sendOtpEmail, sendResetPasswordEmail };

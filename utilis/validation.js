@@ -4,7 +4,7 @@ const registerSchema = Joi.object({
   username: Joi.string().min(4).max(25).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
-  phone: Joi.string().regex(/^\d{10}$/), 
+  phone: Joi.string().regex(/^\d{10}$/),
 });
 
 const loginSchema = Joi.object({
@@ -30,4 +30,9 @@ const otpVerificationSchema = Joi.object({
   code: Joi.string().required(),
 });
 
-module.exports = { registerSchema, loginSchema, requestPasswordResetSchema, resetPasswordSchema, phoneSignInSchema, otpVerificationSchema };
+
+const otpEmailVerificationSchema = Joi.object({
+  email: Joi.string().email().required(),
+  code: Joi.string().length(6).required()
+});
+module.exports = { registerSchema, loginSchema, requestPasswordResetSchema, resetPasswordSchema, phoneSignInSchema, otpVerificationSchema ,otpEmailVerificationSchema};
