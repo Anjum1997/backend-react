@@ -12,7 +12,7 @@ exports.registerUser = async (req, res, next) => {
   const { error } = validationschema.registerSchema.validate(req.body);
 
   if (error) {
-    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));
+    return next(new CustomError(res.__('validation_error', { message: error.details[0].message }), 400));                                        
   }
 
   try {
